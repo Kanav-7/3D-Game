@@ -16,6 +16,7 @@ Boat::Boat(float x, float y,float z, color_t color) {
             -1,1,-1,
             -1,1,1,
             -0.5,0.5,0.5,};
+
     GLfloat vertex_buffer_data_right[] =   {
             //right
             0.5,0.5,0.5,
@@ -50,6 +51,21 @@ Boat::Boat(float x, float y,float z, color_t color) {
             0.5,0.5,0.5,
             0.5,0.5,-0.5,};
 
+
+    GLfloat vertex_buffer_data_flag[] = {
+            0.0f,0.5f,0.0f,
+            0.1f,0.5f,0.0f,
+            0.0f,2.0f,0.0f,
+
+            0.1f,0.5f,0.0f,
+            0.0f,2.0f,0.0f,
+            0.1f,2.0f,0.0f,
+
+            0.1f, 1.0f, 0.0f,
+            0.3f, 1.5f, 0.0f,
+            0.1f, 2.0f, 0.0f,
+        };
+
     for(int i=0;i<2*3*3;i++)
     {
         vertex_buffer_data_left[i]*= 2;
@@ -58,6 +74,9 @@ Boat::Boat(float x, float y,float z, color_t color) {
         vertex_buffer_data_behind[i]*= 2;
         vertex_buffer_data_front[i]*= 2;
     }
+
+    for(int i=0;i<3*3*3;i++)
+        vertex_buffer_data_flag[i]*=2;
         //    static GLfloat vertex_buffer_data[200];
 
 //    vertex_buffer_data[0] = -0.5;
@@ -218,6 +237,7 @@ Boat::Boat(float x, float y,float z, color_t color) {
     this->object3 = create3DObject(GL_TRIANGLES, 2*3, vertex_buffer_data_behind, ICOLOR_GREEN, GL_FILL);
     this->object4 = create3DObject(GL_TRIANGLES, 2*3, vertex_buffer_data_front, COLOR_BLACK, GL_FILL);
     this->object5 = create3DObject(GL_TRIANGLES, 2*3, vertex_buffer_data_down, ICOLOR_INDIGO, GL_FILL);
+    this->object6 = create3DObject(GL_TRIANGLES, 3*3, vertex_buffer_data_flag, ICOLOR_VIOLET, GL_FILL);
 }
 
 void Boat::draw(glm::mat4 VP) {
@@ -234,6 +254,8 @@ void Boat::draw(glm::mat4 VP) {
     draw3DObject(this->object3);
     draw3DObject(this->object4);
     draw3DObject(this->object5);
+    draw3DObject(this->object6);
+
 }
 
 void Boat::set_speed(double vx, double vy,double vz) {
@@ -259,6 +281,6 @@ bounding_box_t Boat::bounding_box() {
     float h = 2;
     float b = 4;
     float l = 4;
-    bounding_box_t bbox = { x, y, z, l,b,h };
+    bounding_box_t bbox = { x, y+1, z , l,b,h };
     return bbox;
 }
