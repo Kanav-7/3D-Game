@@ -43,6 +43,7 @@ void keyboard(GLFWwindow *window, int key, int scancode, int action, int mods) {
         case GLFW_KEY_ESCAPE:
             quit(window);
             break;
+
         default:
             break;
         }
@@ -55,6 +56,10 @@ void keyboardChar(GLFWwindow *window, unsigned int key) {
     case 'Q':
     case 'q':
         quit(window);
+        break;
+    case 'C':
+    case 'c':
+        change_camera();
         break;
     default:
         break;

@@ -68,12 +68,18 @@ enum direction_t { DIR_UP, DIR_RIGHT, DIR_DOWN, DIR_LEFT };
 struct bounding_box_t {
     float x;
     float y;
-    float width;
-    float height;
+    float z;
+    float l;
+    float b;
+    float h;
+
 };
 
 bool detect_collision(bounding_box_t a, bounding_box_t b);
-
+void change_camera();
+void speed_camera();
+void heli_camera(float x, float y);
+void zoom_camera(int type);
 extern float screen_zoom, screen_center_x, screen_center_y;
 void reset_screen();
 
@@ -83,5 +89,13 @@ extern const color_t COLOR_GREEN;
 extern const color_t COLOR_BLACK;
 extern const color_t COLOR_BLUE;
 extern const color_t COLOR_BACKGROUND;
+extern const color_t COLOR_GREY;
 
+extern const color_t ICOLOR_VIOLET ;
+extern const color_t ICOLOR_INDIGO;
+extern const color_t ICOLOR_BLUE ;
+extern const color_t ICOLOR_GREEN ;
+extern const color_t ICOLOR_YELLOW ;
+extern const color_t ICOLOR_ORANGE;
+extern const color_t ICOLOR_RED;
 #endif

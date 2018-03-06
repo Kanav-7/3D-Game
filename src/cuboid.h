@@ -10,12 +10,19 @@ public:
     Cuboid(float x, float y,float z, float l,float b, float h, color_t color);
     glm::vec3 position;
     float rotation;
+    float rotationx;
+    float length;
+    float breadth;
+    float height;
     void draw(glm::mat4 VP);
     void set_position(float x, float y,float z);
+    void set_speed(double vx, double vy,double vz);
+    bounding_box_t bounding_box();
     void tick();
-    double speed;
+    glm::vec3 speed;
 private:
     VAO *object;
 };
+
 
 #endif // BALL_H

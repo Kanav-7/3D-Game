@@ -8,21 +8,23 @@ Boat::Boat(float x, float y,float z, color_t color) {
     // Our vertices. Three consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
     // A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
 
-    static GLfloat vertex_buffer_data[] =   {
+    GLfloat vertex_buffer_data_left[] =   {
         //left
             -1,1,-1,
             -0.5,0.5,-0.5,
             -0.5,0.5,0.5,
             -1,1,-1,
             -1,1,1,
-            -0.5,0.5,0.5,
+            -0.5,0.5,0.5,};
+    GLfloat vertex_buffer_data_right[] =   {
             //right
             0.5,0.5,0.5,
             1,1,1,
             1,1,-1,
             0.5,0.5,0.5,
             0.5,0.5,-0.5,
-            1,1,-1,
+            1,1,-1,};
+    GLfloat vertex_buffer_data_front[] =   {
             //front
             -1,1,-1,
             -0.5,0.5,-0.5,
@@ -30,24 +32,33 @@ Boat::Boat(float x, float y,float z, color_t color) {
             -1,1,-1,
             1,1,-1,
             0.5,0.5,-0.5,
+    };
+    GLfloat vertex_buffer_data_behind[] =   {
             //back
             0.5,0.5,0.5,
             1,1,1,
             -1,1,1,
             0.5,0.5,0.5,
             -0.5,0.5,0.5,
-            -1,1,1,
+            -1,1,1,};
+    GLfloat vertex_buffer_data_down[] =   {
             //bottom
             -0.5,0.5,0.5,
             -0.5,0.5,-0.5,
             0.5,0.5,-0.5,
             -0.5,0.5,0.5,
             0.5,0.5,0.5,
-            0.5,0.5,-0.5,
-        };
-    for(int i=0;i<10*3*3;i++)
-        vertex_buffer_data[i]*= 2;
-//    static GLfloat vertex_buffer_data[200];
+            0.5,0.5,-0.5,};
+
+    for(int i=0;i<2*3*3;i++)
+    {
+        vertex_buffer_data_left[i]*= 2;
+        vertex_buffer_data_right[i]*= 2;
+        vertex_buffer_data_down[i]*= 2;
+        vertex_buffer_data_behind[i]*= 2;
+        vertex_buffer_data_front[i]*= 2;
+    }
+        //    static GLfloat vertex_buffer_data[200];
 
 //    vertex_buffer_data[0] = -0.5;
 //    vertex_buffer_data[1] = 0.5;
@@ -201,8 +212,12 @@ Boat::Boat(float x, float y,float z, color_t color) {
 //    vertex_buffer_data[106] = 1;
 //    vertex_buffer_data[107] = -1;
 
-    color_t a[] = {color,COLOR_BLACK};
-    this->object = create3DObject(GL_TRIANGLES, 10*3, vertex_buffer_data, a, GL_FILL,18);
+//    color_t a[] = {color,COLOR_BLACK};
+    this->object1 = create3DObject(GL_TRIANGLES, 2*3, vertex_buffer_data_left, ICOLOR_ORANGE, GL_FILL);
+    this->object2 = create3DObject(GL_TRIANGLES, 2*3, vertex_buffer_data_right, ICOLOR_RED, GL_FILL);
+    this->object3 = create3DObject(GL_TRIANGLES, 2*3, vertex_buffer_data_behind, ICOLOR_GREEN, GL_FILL);
+    this->object4 = create3DObject(GL_TRIANGLES, 2*3, vertex_buffer_data_front, COLOR_BLACK, GL_FILL);
+    this->object5 = create3DObject(GL_TRIANGLES, 2*3, vertex_buffer_data_down, ICOLOR_INDIGO, GL_FILL);
 }
 
 void Boat::draw(glm::mat4 VP) {
@@ -214,7 +229,11 @@ void Boat::draw(glm::mat4 VP) {
     Matrices.model *= (translate * rotate);
     glm::mat4 MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
-    draw3DObject(this->object);
+    draw3DObject(this->object1);
+    draw3DObject(this->object2);
+    draw3DObject(this->object3);
+    draw3DObject(this->object4);
+    draw3DObject(this->object5);
 }
 
 void Boat::set_speed(double vx, double vy,double vz) {
@@ -227,9 +246,19 @@ void Boat::set_position(float x, float y,float z) {
 
 void Boat::tick() {
 //    this->rotation += speed;
-    this->position.x -= this->speed.x;
-    this->position.y -= this->speed.y;
-    this->position.z -= this->speed.z;
+    this->position.x += this->speed.x;
+    this->position.y += this->speed.y;
+    this->position.z += this->speed.z;
     // this->position.y -= speed;
 }
 
+bounding_box_t Boat::bounding_box() {
+    float x = this->position.x;
+    float y = this->position.y;
+    float z = this->position.z;
+    float h = 2;
+    float b = 4;
+    float l = 4;
+    bounding_box_t bbox = { x, y, z, l,b,h };
+    return bbox;
+}

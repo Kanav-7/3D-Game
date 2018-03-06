@@ -10,6 +10,7 @@ public:
     Boat(float x, float y, float z,color_t color);
     glm::vec3 position;
     glm::vec3 speed;
+    bounding_box_t bounding_box();
 
     float rotation;
     void draw(glm::mat4 VP);
@@ -17,7 +18,11 @@ public:
     void set_speed(double vx, double vy,double vz);
     void tick();
 private:
-    VAO *object;
+    VAO *object1;
+    VAO *object2;
+    VAO *object3;
+    VAO *object4;
+    VAO *object5;
 };
 
 #endif // BALL_H
