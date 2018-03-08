@@ -4,6 +4,7 @@
 #include "boat.h"
 #include "ball.h"
 #include "diamond.h"
+#include "wave.h"
 using namespace std;
 
 GLMatrices Matrices;
@@ -16,17 +17,21 @@ GLFWwindow *window;
 
 int score=0,health=100,life=3;
 int view = 0;
-float camera_x = 0;
-float camera_y = 75;
-float camera_z = 20;
-float target_x = 0;
-float target_y = 75;
-float target_z = 0;
+float xcam = 0;
+float ycam = 75;
+float zcam = 20;
+float xtar = 0;
+float ytar = 75;
+float ztar = 0;
 Cuboid water,cannon;
+Cuboid island;
 Cuboid boss;
 Boat boat;
+Wave wav[1000];
+int num_wave = 100;
 Cuboid rocks[10000];
 Cuboid monster[10000];
+int mon_stat[10000];
 Cuboid barrel[10000];
 Diamond gifts[10000];
 Cuboid boost;
@@ -64,11 +69,11 @@ void draw() {
     // Eye - Location of camera. Don't change unless you are sure!!
 //    glm::vec3 eye (boat.position.x, boat.position.y + 5,boat.position.z +  20 );
 //    glm::vec3 eye ( 1, 5,0 );
-      glm::vec3 eye(camera_x,camera_y,camera_z);
+      glm::vec3 eye(xcam,ycam,zcam);
     // Target - Where is the camera looking at.  Don't change unless you are sure!!
 //    glm::vec3 target (0, 10, 10);
 //    glm::vec3 target (boat.position.x,boat.position.y,boat.position.z);
-      glm::vec3 target (target_x,target_y,target_z);
+      glm::vec3 target (xtar,ytar,ztar);
     // Up - Up vector defines tilt of camera.  Don't change unless you are sure!!
     glm::vec3 up (0, 1, 0);
 
@@ -95,11 +100,16 @@ void draw() {
         monster[i].draw(VP);
         gifts[i].draw(VP);
     }
+//    for(int i=0;i<num_wave;i++)
+//    {
+//        wav[i].draw(VP);
+//    }
 
     for(int i=0;i<num_coins;i++){
         coins[i].draw(VP);
         barrel[i].draw(VP);
     }
+    island.draw(VP);
     boost.draw(VP);
     boss.draw(VP);
     boat.draw(VP);
@@ -232,8 +242,8 @@ void tick_elements() {
     }
     if(windflag)
     {
-        windx = /*random(-0.3,0.3);*/ 0;
-        windz = /*random(-0.3,0.3)*/ 0;
+        windx = random(-0.2,0.2);
+        windz = random(-0.2,0.2);
         windflag = 0;
         boat.speed.x+=windx;
         boat.speed.z+=windz;
@@ -276,6 +286,16 @@ void tick_elements() {
         }
     }
 
+    for(int i=0;i<num_coins;i++)
+    {
+        if(detect_collision(boat.bounding_box(),barrel[i].bounding_box()))
+        {
+//            health-=1;
+            boat.set_position(boat.position.x,boat.position.y,boat.position.z + 1);
+            cannon.set_position(boat.position.x,boat.position.y + 2.5f,boat.position.z);
+        }
+    }
+
     for(int i=0;i<num_monster;i++)
     {
         gifts[i].rotation+=3;
@@ -283,7 +303,7 @@ void tick_elements() {
         {
             score+=20;
             num_kill++;
-            if(num_kill == 1)
+            if(num_kill == 3)
                 boss.set_position(random(-100,100),5,random(-100,100));
             gifts[i].set_position(monster[i].position.x,3,monster[i].position.z);
             monster[i].set_position(random(-500,500),2,random(-500,500));
@@ -309,7 +329,7 @@ void tick_elements() {
 
         if(detect_collision(boat.bounding_box(),gifts[i].bounding_box()))
         {
-            health+=10;
+            health+=10 + rand()%10;
             gifts[i].set_position(10000,10000,10000);
         }
         monster[i].tick();
@@ -334,6 +354,7 @@ void tick_elements() {
     if(detect_collision(boat.bounding_box(),boost.bounding_box()))
     {
         score+=10;
+        health+=20;
         boost.set_position(11000,11000,11000);
         boost_flag = 1;
         boosttick = 0;
@@ -356,7 +377,7 @@ void tick_elements() {
     {
         if(detect_collision(boat.bounding_box(),coins[i].bounding_box()))
         {
-            score+=5;
+            score+=5 + rand()%10;
             coins[i].set_position(random(-500,500),7,random(-500,500));
         }
         coins[i].rotation+=3;
@@ -403,7 +424,7 @@ void initGL(GLFWwindow *window, int width, int height) {
     fireball = Cuboid(10000,10000,10000,0.2,0.2,0.2,COLOR_BLACK);
     cannon.rotationx = 40;
 //    cannon.rotation = 140;
-
+    island = Cuboid(100,1,100,100,100,0.6,ICOLOR_ORANGE);
     boat = Boat(0,0,0,COLOR_GREEN);
     boost = Cuboid(11000,11000,11000,4,4,4,ICOLOR_ORANGE);
     for(int i=0;i<num_rocks;i++)
@@ -415,6 +436,12 @@ void initGL(GLFWwindow *window, int width, int height) {
         gifts[i] = Diamond(10000,10000,10000,COLOR_CYAN);
         //3
     }
+
+//    int p = -1000;
+//    for(int i=0;i<num_wave;i++)
+//    {
+//        wav[i] = Wave();
+//    }
 
     for(int i=0;i<num_coins;i++)
     {
@@ -498,99 +525,76 @@ void reset_screen() {
 
 void change_camera(){
     view++;
-    view = view%5;
+    view = view%6;
 }
 
 void speed_camera()
 {
-//    cout << view << endl;
-    if(view==1){
+    if(view==1)
+    {
 
-        camera_x = boat.position.x;
-        camera_y = boat.position.y + 5;
-        camera_z = boat.position.z -  20;
-        target_x = boat.position.x;
-        target_y = boat.position.y;
-        target_z = boat.position.z;
+        xcam = boat.position.x;
+        ycam = boat.position.y + 5;
+        zcam = boat.position.z -  20;
+        xtar = boat.position.x;
+        ytar = boat.position.y;
+        ztar = boat.position.z;
 
     }
-    else if(view==0)
+
+    if(view==0)
     {
-        // follow
         double theta = (boat.rotation)*(M_PI/180);
 
-        camera_x = boat.position.x+3*sin(theta);
-        camera_y = boat.position.y+2;
-        camera_z = boat.position.z+3*cos(theta);
+        xcam = boat.position.x+3*sin(theta);
+        ycam = boat.position.y+2;
+        zcam = boat.position.z+3*cos(theta);
 
-        target_x = boat.position.x+10*sin(theta);
-        target_y = boat.position.y+2;
-        target_z = boat.position.z+10*cos(theta);
+        xtar = boat.position.x+10*sin(theta);
+        ytar = boat.position.y+2;
+        ztar = boat.position.z+10*cos(theta);
 
     }
-    else if(view==2)
+
+    if(view==2)
     {
-        // tower view
-        camera_y = 30;
-//        camera_z+=5;
-        target_y = 30;
+        ycam = 30;
+        ytar = 30;
     }
-    else if(view==3)
+
+    if(view==3)
     {
         // top view
-        camera_x = boat.position.x;
-        camera_y = 200;
-        camera_z = boat.position.z;
+        xcam = boat.position.x;
+        ycam = 200;
+        zcam = boat.position.z;
 
-        target_x = boat.position.x+1;
-        target_y = boat.position.y;
-        target_z = boat.position.z;
-//        printf("cx=%f cy=%f cz=%f\n", camera_x, camera_y, camera_z);
-//        printf("tx=%f ty=%f tz=%f\n", target_x, target_y, target_z);
+        xtar = boat.position.x+1;
+        ytar = boat.position.y;
+        ztar = boat.position.z;
     }
-    else if(view==4)
+
+    if(view==4)
     {
         // helicopter
-        camera_x = boat.position.x+90;
-        camera_y = 90;
-        camera_z = boat.position.z;
+        xcam = boat.position.x+90;
+        ycam = 90;
+        zcam = boat.position.z;
 
-        target_x = boat.position.x;
-        target_y = boat.position.y;
-        target_z = boat.position.z;
+        xtar = boat.position.x;
+        ytar = boat.position.y;
+        ztar = boat.position.z;
     }
 
-}
-
-void heli_camera(float x, float y)
-{
-    if(view==2)
+    if(view == 5)
     {
-        target_x = boat.position.x+(x-300);
-        if(y<=300)
-        {
-            target_y = boat.position.y+(300-y)/2;
-        }
+        xcam = boat.position.x+60*sin(boat.rotation*M_PI/180.0f);;
+        ycam= 30;
+        zcam = boat.position.z+60*cos(boat.rotation*M_PI/180.0f);
+        xtar = boat.position.x;
+        ytar = boat.position.y;
+        ztar = boat.position.z;
     }
+
 }
 
-void zoom_camera(int type)
-{
-    if(view==2)
-    {
-        double l = target_x-camera_x;
-        double m = target_y-camera_y;
-        double n = target_z-camera_z;
-        if(type==1)
-        {
-            if(camera_z-10>target_z)
-                camera_z-=10;
-        }
-        else if(type==-1)
-        {
-            camera_z+=10;
-        }
-        camera_x = l*(camera_z-target_z)/n+target_x;
-        camera_y = m*(camera_z-target_z)/n+target_y;
-    }
-}

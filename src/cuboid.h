@@ -14,6 +14,7 @@ public:
     float length;
     float breadth;
     float height;
+    float size;
     void draw(glm::mat4 VP);
     void set_position(float x, float y,float z);
     void set_speed(double vx, double vy,double vz);

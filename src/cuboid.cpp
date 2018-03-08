@@ -9,6 +9,7 @@ Cuboid::Cuboid(float x, float y,float z,float l,float b,float h, color_t color) 
     this->breadth = b;
     this->height = h;
     this->speed = glm::vec3(0,0,0);
+    this->size = 1.0f;
     // Our vertices. Three consecutive floats give a 3D vertex; Three consecutive vertices give a triangle.
     // A cube has 6 faces with 2 triangles each, so this makes 6*2=12 triangles, and 12*3 vertices
     GLfloat vertex_buffer_data[] = {
@@ -74,7 +75,9 @@ void Cuboid::draw(glm::mat4 VP) {
 
     // No need as coords centered at 0, 0, 0 of cube arouund which we waant to rotate
     // rotate          = rotate * glm::translate(glm::vec3(0, -0.6, 0));
-    Matrices.model *= (translate * rotate * rotatex);
+
+    glm::mat4 scale    = glm::scale(glm::vec3(this->size, this->size, this->size));
+    Matrices.model *= (translate * rotate * rotatex * scale);
     glm::mat4 MVP = VP * Matrices.model;
     glUniformMatrix4fv(Matrices.MatrixID, 1, GL_FALSE, &MVP[0][0]);
     draw3DObject(this->object);
